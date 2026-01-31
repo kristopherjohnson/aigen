@@ -66,9 +66,29 @@
 - [x] Update README.md with new examples
 - [x] Update help text and documentation [agent: swift-expert]
 
+## Phase 5: System Instructions Option
+
+### 5.1 Argument Parsing for Instructions
+- [x] Add -i/--instruction option to accept text arguments [agent: swift-expert]
+- [x] Support multiple instances of -i/--instruction [agent: swift-expert]
+- [x] Store instructions separately from prompts [agent: swift-expert]
+
+### 5.2 LanguageModelSession Integration
+- [x] Modify sendToModel() to accept optional instructions parameter [agent: swift-expert]
+- [x] Concatenate multiple instructions with newlines [agent: swift-expert]
+- [x] Create LanguageModelSession with instructions using trailing closure [agent: swift-expert]
+- [x] Update verbose output to show instruction count [agent: swift-expert]
+
+### 5.3 Testing and Documentation
+- [x] Test single instruction option [agent: swift-expert]
+- [x] Test multiple instructions concatenation [agent: swift-expert]
+- [x] Update README.md with instruction examples
+- [x] Update CLAUDE.md with instructions API usage
+
 ## Milestones
 
 1. **M1**: CLI accepts files/stdin and prints concatenated content
 2. **M2**: Foundation Models integration working, prints AI response
 3. **M3**: Verbose mode and error handling complete
 4. **M4**: Prompt text option (-p/--prompt) working with files
+5. **M5**: System instructions option (-i/--instruction) integrated with LanguageModelSession

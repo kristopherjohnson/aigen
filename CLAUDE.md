@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-`aigen` is a Swift CLI tool that sends prompts to Apple Intelligence Foundation Models. It's a single-file executable that reads input from files, inline prompt text, or stdin and prints the AI model's response.
+`aigen` is a Swift CLI tool that sends prompts to Apple Intelligence Foundation Models. It's a single-file executable that reads input from files, inline prompt text, or stdin, optionally with system instructions, and prints the AI model's response.
 
 ## Requirements
 
@@ -42,10 +42,12 @@ This is a single-file CLI application (`Sources/aigen/main.swift`) with a simple
    - All `-p/--prompt` text arguments (concatenated first)
    - All file arguments (read and concatenated)
    - Stdin (if no prompts or files provided)
-3. `sendToModel()` - sends concatenated input to FoundationModels framework
+3. `sendToModel()` - sends concatenated input to FoundationModels framework with optional instructions
 4. Response printed to stdout, verbose info to stderr
 
 **Key Design Decisions:**
+- System instructions (`-i`) are stored separately and passed to LanguageModelSession
+- Multiple instructions are concatenated with newlines
 - Prompt texts (`-p`) are always concatenated before file contents
 - All inputs separated by newlines when joined
 - Verbose output goes to stderr via custom `StandardError` TextOutputStream
@@ -69,11 +71,20 @@ echo "Test content" > test.txt
 # Test with stdin
 echo "Hello" | .build/debug/aigen
 
+# Test with instructions
+.build/debug/aigen -i "Be concise" -p "What is 2+2?"
+
+# Test with multiple instructions
+.build/debug/aigen -i "You are helpful" -i "Be brief" -p "Explain AI"
+
 # Test with combined inputs
 .build/debug/aigen -p "Context:" file.txt -p "Question: Explain"
 
+# Test instructions with file
+.build/debug/aigen -i "Summarize in bullets" document.txt
+
 # Test verbose mode
-.build/debug/aigen -v -p "Test prompt"
+.build/debug/aigen -v -i "Test instruction" -p "Test prompt"
 ```
 
 ## Foundation Models API Usage
@@ -88,8 +99,15 @@ switch model.availability {
     case .unavailable(reason): // handle specific reasons
 }
 
-// Create session and send prompt
+// Create session without instructions
 let session = LanguageModelSession()
+
+// Create session WITH instructions (using trailing closure)
+let session = LanguageModelSession {
+    instructionsText  // String containing concatenated instructions
+}
+
+// Send prompt and get response
 let response = try await session.respond(to: prompt)
 return response.content
 ```

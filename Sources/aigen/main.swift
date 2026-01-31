@@ -17,11 +17,16 @@ struct Aigen: AsyncParsableCommand {
               aigen -p "What is the capital of France?"
               aigen -p "Summarize this:" document.txt
               aigen -p "Good morning" file.md -p "Good evening"
+              aigen -i "You are a helpful assistant" -p "What is 2+2?"
+              aigen -i "Be concise" -i "Use bullet points" document.txt
             """
     )
 
     @Flag(name: [.short, .long], help: "Show processing details")
     var verbose = false
+
+    @Option(name: [.short, .long], help: "Set system instructions for model (can be repeated)")
+    var instruction: [String] = []
 
     @Option(name: [.short, .long], help: "Add inline text to prompt (can be repeated)")
     var prompt: [String] = []
@@ -35,9 +40,14 @@ struct Aigen: AsyncParsableCommand {
 
         if verbose {
             print("Read \(input.count) characters", to: &standardError)
+            if !instruction.isEmpty {
+                print("Using \(instruction.count) instruction(s)", to: &standardError)
+            }
         }
 
-        let response = try await sendToModel(input)
+        let instructionsText = instruction.isEmpty ? nil : instruction.joined(separator: "\n")
+
+        let response = try await sendToModel(input, instructions: instructionsText)
         print(response)
 
         if verbose {
@@ -56,9 +66,9 @@ struct Aigen: AsyncParsableCommand {
 
         var contents: [String] = []
 
-        for (index, promptText) in prompt.enumerated() {
+        for promptText in prompt {
             if verbose {
-                print("Adding prompt text #\(index + 1)...", to: &standardError)
+                print("Adding prompt text...", to: &standardError)
             }
             contents.append(promptText)
         }
@@ -67,19 +77,21 @@ struct Aigen: AsyncParsableCommand {
             if verbose {
                 print("Reading \(filePath)...", to: &standardError)
             }
-            guard FileManager.default.fileExists(atPath: filePath) else {
-                throw ValidationError("File not found: \(filePath)")
-            }
-            let fileURL = URL(fileURLWithPath: filePath)
-            do {
-                let content = try String(contentsOf: fileURL, encoding: .utf8)
-                contents.append(content)
-            } catch {
-                throw ValidationError("Failed to read file '\(filePath)': \(error.localizedDescription)")
-            }
+            contents.append(try readFile(at: filePath))
         }
 
         return contents.joined(separator: "\n")
+    }
+
+    private func readFile(at path: String) throws -> String {
+        guard FileManager.default.fileExists(atPath: path) else {
+            throw ValidationError("File not found: \(path)")
+        }
+        do {
+            return try String(contentsOf: URL(fileURLWithPath: path), encoding: .utf8)
+        } catch {
+            throw ValidationError("Failed to read file '\(path)': \(error.localizedDescription)")
+        }
     }
 
     private func readStdin() throws -> String {
@@ -90,29 +102,42 @@ struct Aigen: AsyncParsableCommand {
         return lines.joined()
     }
 
-    private func sendToModel(_ prompt: String) async throws -> String {
+    private func sendToModel(_ prompt: String, instructions: String?) async throws -> String {
         guard #available(macOS 26, *) else {
             throw ValidationError("Foundation Models requires macOS 26 or newer.")
         }
 
         let model = SystemLanguageModel.default
 
-        switch model.availability {
-        case .available:
-            break
-        case .unavailable(.appleIntelligenceNotEnabled):
-            throw ValidationError("Apple Intelligence must be enabled in System Settings.")
-        case .unavailable(.modelNotReady):
-            throw ValidationError("The on-device model isn't ready yet.")
-        case .unavailable(.deviceNotEligible):
-            throw ValidationError("Your device doesn't support Apple Intelligence.")
-        case .unavailable(_):
-            throw ValidationError("Foundation Models is unavailable.")
+        guard case .available = model.availability else {
+            throw ValidationError(availabilityMessage(for: model.availability))
         }
 
-        let session = LanguageModelSession()
+        let session: LanguageModelSession
+        if let instructions {
+            session = LanguageModelSession { instructions }
+        } else {
+            session = LanguageModelSession()
+        }
+
         let response = try await session.respond(to: prompt)
         return response.content
+    }
+
+    @available(macOS 26, *)
+    private func availabilityMessage(for availability: SystemLanguageModel.Availability) -> String {
+        switch availability {
+        case .available:
+            return "Model is available."
+        case .unavailable(.appleIntelligenceNotEnabled):
+            return "Apple Intelligence must be enabled in System Settings."
+        case .unavailable(.modelNotReady):
+            return "The on-device model isn't ready yet."
+        case .unavailable(.deviceNotEligible):
+            return "Your device doesn't support Apple Intelligence."
+        case .unavailable(_):
+            return "Foundation Models is unavailable."
+        }
     }
 }
 

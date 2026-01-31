@@ -22,12 +22,14 @@ A Swift CLI tool that sends prompts to Apple Intelligence Foundation Models. Rea
 - **File input**: Accept one or more file paths as command-line arguments
 - **Stdin fallback**: Read from stdin when no files are provided
 - **Prompt text option**: Accept inline prompt text via `-p/--prompt` option (can be used multiple times)
+- **System instructions**: Accept system instructions via `-i/--instruction` option (can be used multiple times)
 - **Prompt concatenation**: Combine contents of multiple files and prompt texts in order specified
-- **Model invocation**: Send prompt to Apple Intelligence Foundation Model
+- **Model invocation**: Send prompt to Apple Intelligence Foundation Model with optional instructions
 - **Output**: Print model response to stdout
 
 ### Options
 
+- **Instruction text** (`-i TEXT`, `--instruction TEXT`): Set system instructions for the model (can be used multiple times; multiple instructions are concatenated with newlines)
 - **Prompt text** (`-p TEXT`, `--prompt TEXT`): Add inline text to the prompt (can be used multiple times, interspersed with file arguments)
 - **Verbose mode** (`-v`, `--verbose`): Display processing details (files read, token counts, timing)
 
@@ -40,6 +42,7 @@ ARGUMENTS:
   file                    Input files to read (reads stdin if none provided)
 
 OPTIONS:
+  -i, --instruction TEXT  Set system instructions for model (can be repeated)
   -p, --prompt TEXT       Add inline text to prompt (can be repeated)
   -v, --verbose           Show processing details
   -h, --help              Show help information
@@ -72,8 +75,14 @@ aigen -p "Summarize this:" document.txt
 # Multiple prompts interspersed with files
 aigen -p "Tell me good morning" file.md -p "Tell me good evening"
 
-# Complex combination
-aigen -p "System: You are helpful" context.txt -p "Question: Explain this"
+# System instructions
+aigen -i "You are a helpful assistant. Be concise." -p "What is 2+2?"
+
+# Multiple instructions (concatenated)
+aigen -i "You are a technical expert." -i "Explain in simple terms." document.txt
+
+# Instructions with file input
+aigen -i "Summarize the following in bullet points:" report.txt
 ```
 
 ## Technical Requirements
@@ -94,4 +103,3 @@ aigen -p "System: You are helpful" context.txt -p "Question: Explain this"
 - Conversation history/multi-turn chat
 - Streaming output (print complete response)
 - Configuration files
-- Custom system prompts (may add later)

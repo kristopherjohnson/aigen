@@ -1,6 +1,6 @@
 # aigen
 
-A Swift CLI tool that sends prompts to Apple Intelligence Foundation Models. Reads input from files, inline prompt text, or stdin and prints the model's response.
+A Swift CLI tool that sends prompts to Apple Intelligence Foundation Models. Reads input from files, inline prompt text, or stdin, optionally with system instructions, and prints the model's response.
 
 ## Requirements
 
@@ -17,7 +17,7 @@ Build from source using Swift Package Manager:
 git clone <repository-url>
 cd aigen
 swift build -c release
-cp .build/release/aigen /usr/local/bin/
+cp .build/release/aigen /usr/local/bin/  # may need 'sudo'
 ```
 
 ## Usage
@@ -29,6 +29,7 @@ ARGUMENTS:
   file                    Input files to read (reads stdin if none provided)
 
 OPTIONS:
+  -i, --instruction TEXT  Set system instructions for model (can be repeated)
   -p, --prompt TEXT       Add inline text to prompt (can be repeated)
   -v, --verbose           Show processing details
   -h, --help              Show help information
@@ -76,6 +77,21 @@ aigen -p "You are a helpful assistant." -p "What is 2+2?"
 aigen -p "System: Be concise" context.txt -p "Question: Explain"
 ```
 
+**System instructions:**
+```bash
+aigen -i "Be concise" -p "What is 2+2?"
+```
+
+**Multiple instructions (concatenated):**
+```bash
+aigen -i "You are a helpful assistant." -i "Use bullet points." document.txt
+```
+
+**Instructions with prompts and files:**
+```bash
+aigen -i "Summarize in 5 sentences" -p "Key points:" report.txt
+```
+
 **Verbose output:**
 ```bash
 aigen -v prompt.txt
@@ -84,11 +100,14 @@ aigen -v prompt.txt
 ## How It Works
 
 1. Reads input from inline prompt texts (`-p`), files, or stdin
-2. Concatenates prompt texts and file contents with newlines
-3. Sends the combined prompt to Apple's on-device Foundation Model
-4. Prints the model's response to stdout
+2. Optionally sets system instructions (`-i`) for the model
+3. Concatenates prompt texts and file contents with newlines
+4. Sends the combined prompt to Apple's on-device Foundation Model with instructions
+5. Prints the model's response to stdout
 
-Note: When using both `-p` and file arguments, all prompt texts are concatenated first, followed by all file contents.
+Notes:
+- When using both `-p` and file arguments, all prompt texts are concatenated first, followed by all file contents
+- Multiple instructions are concatenated with newlines and passed to the LanguageModelSession
 
 ## Error Handling
 

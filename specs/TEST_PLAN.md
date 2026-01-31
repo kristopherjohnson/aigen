@@ -29,6 +29,13 @@
 - [x] Empty prompt text handled appropriately (ArgumentParser handles)
 - [ ] Prompt text with special characters (quotes, newlines)
 
+### Instruction Handling
+- [x] Single instruction text processed correctly (tested)
+- [x] Multiple instructions concatenated with newlines (tested)
+- [x] Instructions passed to LanguageModelSession (tested)
+- [x] Instructions work with prompts and files (tested)
+- [x] Empty instruction handled appropriately (ArgumentParser handles)
+
 ## Integration Tests
 
 ### End-to-End
@@ -53,6 +60,10 @@
 - [x] `aigen -p "Summarize:" file.txt` concatenates prompt and file (tested: works)
 - [x] `aigen -p "Good morning" -p "Good evening"` maintains order (tested: works)
 - [x] `aigen -v -p "test"` shows prompt text in verbose output (tested: works)
+- [x] `aigen -i "Be concise" -p "What is 2+2?"` uses instruction (tested: works)
+- [x] `aigen -i "You are helpful" -i "Be brief" -p "Explain AI"` concatenates instructions (tested: works)
+- [x] `aigen -i "Summarize in bullets:" file.txt` combines instruction with file (tested: works)
+- [x] `aigen -v -i "test instruction"` shows instruction in verbose output (tested: works)
 
 ### Edge Cases
 - [ ] Very large file input (test context limits)
