@@ -1,0 +1,25 @@
+# Swift Package Manager
+.build/
+Packages/
+Package.resolved
+*.xcodeproj
+
+# macOS
+.DS_Store
+
+# Xcode
+xcuserdata/
+*.xcworkspace
+
+# Build artifacts
+*.swiftmodule
+*.swiftdoc
+
+# IDE
+.vscode/
+.claude/
+
+# Development
+*.swp
+*~
+.*.sw?
