@@ -36,6 +36,13 @@
 - [x] Instructions work with prompts and files (tested)
 - [x] Empty instruction handled appropriately (ArgumentParser handles)
 
+### Streaming Output
+- [x] Response streams to stdout incrementally (tested: works)
+- [x] No buffering delays (text appears as generated) (tested: fflush ensures immediate output)
+- [x] Stream errors handled gracefully (for-await try handles errors)
+- [x] Final newline printed after stream completes (tested: works)
+- [x] Timing measurement reflects streaming behavior (tested: works)
+
 ## Integration Tests
 
 ### End-to-End
@@ -64,6 +71,35 @@
 - [x] `aigen -i "You are helpful" -i "Be brief" -p "Explain AI"` concatenates instructions (tested: works)
 - [x] `aigen -i "Summarize in bullets:" file.txt` combines instruction with file (tested: works)
 - [x] `aigen -v -i "test instruction"` shows instruction in verbose output (tested: works)
+
+### No-Stream Option
+- [x] `aigen --no-stream -p "What is 2+2?"` waits for complete response (tested: works)
+- [x] `aigen --no-stream -v -p "test"` works with verbose mode (tested: works)
+- [x] Default behavior (without --no-stream) still streams (tested: works)
+
+### Streaming Behavior
+- [x] Visual confirmation: response appears incrementally, not all at once (tested: counting task shows incremental output)
+- [x] Long response streams smoothly without delays (tested: works)
+- [ ] Ctrl+C during streaming terminates gracefully
+- [ ] Piped output works correctly with streaming
+
+### No-Stream Mode
+- [x] --no-stream flag disables streaming (tested: works)
+- [x] Response appears all at once in --no-stream mode (tested: works)
+- [x] --no-stream with verbose mode works correctly (tested: works)
+- [x] --no-stream with instructions works correctly (tested: works)
+
+### Temperature Option
+- [x] `aigen -t 0.0 -p "What is 2+2?"` produces focused response (tested: works)
+- [x] `aigen -t 1.0 -p "Write a creative story"` produces creative response (tested: works)
+- [x] `aigen -t 0.5 -p "test"` works with mid-range temperature (tested: works)
+- [x] Default behavior (no -t flag) uses system default temperature (tested: works)
+- [x] Temperature validation: rejects values < 0.0 (tested: error shown)
+- [x] Temperature validation: rejects values > 1.0 (tested: error shown)
+- [x] Temperature works with streaming mode (tested: works)
+- [x] Temperature works with --no-stream mode (tested: works)
+- [x] Temperature works with instructions (tested: works)
+- [x] Verbose output shows temperature when specified (tested: works)
 
 ### Edge Cases
 - [ ] Very large file input (test context limits)

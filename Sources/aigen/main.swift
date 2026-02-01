@@ -31,10 +31,23 @@ struct Aigen: AsyncParsableCommand {
     @Option(name: [.short, .long], help: "Add inline text to prompt (can be repeated)")
     var prompt: [String] = []
 
+    @Option(name: [.short, .long], help: "Set sampling temperature 0.0-1.0 (default: system default)")
+    var temperature: Double?
+
+    @Flag(name: .long, help: "Disable streaming; wait for complete response")
+    var noStream = false
+
     @Argument(help: "Input files to read (reads stdin if none provided)")
     var files: [String] = []
 
     mutating func run() async throws {
+        // Validate temperature range
+        if let temp = temperature {
+            guard temp >= 0.0 && temp <= 1.0 else {
+                throw ValidationError("Temperature must be between 0.0 and 1.0 (got \(temp))")
+            }
+        }
+
         let startTime = Date()
         let input = try readInput()
 
@@ -43,12 +56,15 @@ struct Aigen: AsyncParsableCommand {
             if !instruction.isEmpty {
                 print("Using \(instruction.count) instruction(s)", to: &standardError)
             }
+            if let temp = temperature {
+                print("Temperature: \(temp)", to: &standardError)
+            }
         }
 
         let instructionsText = instruction.isEmpty ? nil : instruction.joined(separator: "\n")
 
-        let response = try await sendToModel(input, instructions: instructionsText)
-        print(response)
+        try await sendToModel(input, instructions: instructionsText, temperature: temperature, stream: !noStream)
+        print()  // Final newline after response
 
         if verbose {
             let duration = Date().timeIntervalSince(startTime)
@@ -102,7 +118,7 @@ struct Aigen: AsyncParsableCommand {
         return lines.joined()
     }
 
-    private func sendToModel(_ prompt: String, instructions: String?) async throws -> String {
+    private func sendToModel(_ prompt: String, instructions: String?, temperature: Double?, stream: Bool) async throws {
         guard #available(macOS 26, *) else {
             throw ValidationError("Foundation Models requires macOS 26 or newer.")
         }
@@ -120,8 +136,37 @@ struct Aigen: AsyncParsableCommand {
             session = LanguageModelSession()
         }
 
-        let response = try await session.respond(to: prompt)
-        return response.content
+        // Create GenerationOptions if temperature is specified
+        let options: GenerationOptions? = if let temperature {
+            GenerationOptions(temperature: temperature)
+        } else {
+            nil
+        }
+
+        if stream {
+            let responseStream = if let options {
+                session.streamResponse(to: prompt, options: options)
+            } else {
+                session.streamResponse(to: prompt)
+            }
+            var previousLength = 0
+            for try await snapshot in responseStream {
+                let fullContent = snapshot.content
+                if fullContent.count > previousLength {
+                    let newContent = String(fullContent.dropFirst(previousLength))
+                    print(newContent, terminator: "")
+                    fflush(stdout)
+                    previousLength = fullContent.count
+                }
+            }
+        } else {
+            let response = if let options {
+                try await session.respond(to: prompt, options: options)
+            } else {
+                try await session.respond(to: prompt)
+            }
+            print(response.content, terminator: "")
+        }
     }
 
     @available(macOS 26, *)

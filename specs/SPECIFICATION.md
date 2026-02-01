@@ -25,12 +25,15 @@ A Swift CLI tool that sends prompts to Apple Intelligence Foundation Models. Rea
 - **System instructions**: Accept system instructions via `-i/--instruction` option (can be used multiple times)
 - **Prompt concatenation**: Combine contents of multiple files and prompt texts in order specified
 - **Model invocation**: Send prompt to Apple Intelligence Foundation Model with optional instructions
-- **Output**: Print model response to stdout
+- **Streaming output**: Stream model response to stdout as it's generated (default behavior)
+- **Output**: Print model response to stdout in real-time
 
 ### Options
 
 - **Instruction text** (`-i TEXT`, `--instruction TEXT`): Set system instructions for the model (can be used multiple times; multiple instructions are concatenated with newlines)
 - **Prompt text** (`-p TEXT`, `--prompt TEXT`): Add inline text to the prompt (can be used multiple times, interspersed with file arguments)
+- **Temperature** (`-t VALUE`, `--temperature VALUE`): Set sampling temperature (0.0-1.0) for response generation; if not specified, uses system default
+- **No streaming** (`--no-stream`): Disable streaming output; waits for complete response before printing
 - **Verbose mode** (`-v`, `--verbose`): Display processing details (files read, token counts, timing)
 
 ## User Interface
@@ -44,6 +47,8 @@ ARGUMENTS:
 OPTIONS:
   -i, --instruction TEXT  Set system instructions for model (can be repeated)
   -p, --prompt TEXT       Add inline text to prompt (can be repeated)
+  -t, --temperature VALUE Set sampling temperature 0.0-1.0 (default: system default)
+      --no-stream         Disable streaming; wait for complete response
   -v, --verbose           Show processing details
   -h, --help              Show help information
 ```
@@ -83,6 +88,15 @@ aigen -i "You are a technical expert." -i "Explain in simple terms." document.tx
 
 # Instructions with file input
 aigen -i "Summarize the following in bullet points:" report.txt
+
+# Non-streaming mode (waits for complete response)
+aigen --no-stream -p "What is 2+2?"
+
+# Custom temperature for more creative responses
+aigen -t 0.8 -p "Write a creative story opening"
+
+# Lower temperature for more focused responses
+aigen -t 0.2 -p "What is the capital of France?"
 ```
 
 ## Technical Requirements
@@ -101,5 +115,5 @@ aigen -i "Summarize the following in bullet points:" report.txt
 
 - Model selection/switching (use default Foundation Model)
 - Conversation history/multi-turn chat
-- Streaming output (print complete response)
 - Configuration files
+- Non-streaming mode (always streams)

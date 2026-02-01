@@ -85,6 +85,59 @@
 - [x] Update README.md with instruction examples
 - [x] Update CLAUDE.md with instructions API usage
 
+## Phase 6: Streaming Output
+
+### 6.1 Replace respond() with streamResponse()
+- [x] Change sendToModel() to use streamResponse() instead of respond() [agent: swift-expert]
+- [x] Iterate over async stream with for-await loop [agent: swift-expert]
+- [x] Print each partial response as it arrives [agent: swift-expert]
+
+### 6.2 Handle Streaming Edge Cases
+- [x] Handle stream errors gracefully [agent: swift-expert]
+- [x] Ensure final newline after complete response [agent: swift-expert]
+- [x] Update timing measurement to reflect streaming behavior [agent: swift-expert]
+
+### 6.3 Testing and Documentation
+- [x] Test streaming output visually [agent: swift-expert]
+- [x] Update README.md to reflect streaming behavior
+- [x] Update CLAUDE.md with streamResponse API usage
+
+## Phase 7: No-Stream Option
+
+### 7.1 Add --no-stream Flag
+- [x] Add --no-stream flag to ArgumentParser [agent: swift-expert]
+- [x] Pass flag to sendToModel() method [agent: swift-expert]
+
+### 7.2 Implement Conditional Output
+- [x] Check no-stream flag in sendToModel() [agent: swift-expert]
+- [x] Use respond() when --no-stream is set [agent: swift-expert]
+- [x] Use streamResponse() when --no-stream is not set (default) [agent: swift-expert]
+
+### 7.3 Testing and Documentation
+- [x] Test --no-stream mode [agent: swift-expert]
+- [x] Update README.md with --no-stream example
+- [x] Update help text documentation
+
+## Phase 8: Temperature Option
+
+### 8.1 Add --temperature Flag
+- [x] Add -t/--temperature option to ArgumentParser [agent: swift-expert]
+- [x] Validate temperature range (0.0-1.0) [agent: swift-expert]
+- [x] Store as optional Double (nil if not specified) [agent: swift-expert]
+
+### 8.2 Integrate with GenerationOptions
+- [x] Create GenerationOptions with temperature when specified [agent: swift-expert]
+- [x] Pass GenerationOptions to respond() method [agent: swift-expert]
+- [x] Pass GenerationOptions to streamResponse() method [agent: swift-expert]
+- [x] Use nil GenerationOptions when temperature not specified (system default) [agent: swift-expert]
+
+### 8.3 Testing and Documentation
+- [x] Test with various temperature values (0.0, 0.5, 1.0) [agent: swift-expert]
+- [x] Test default behavior (no temperature specified) [agent: swift-expert]
+- [x] Update README.md with temperature examples
+- [x] Update CLAUDE.md with GenerationOptions API usage
+- [x] Update verbose output to show temperature when specified [agent: swift-expert]
+
 ## Milestones
 
 1. **M1**: CLI accepts files/stdin and prints concatenated content
@@ -92,3 +145,6 @@
 3. **M3**: Verbose mode and error handling complete
 4. **M4**: Prompt text option (-p/--prompt) working with files
 5. **M5**: System instructions option (-i/--instruction) integrated with LanguageModelSession
+6. **M6**: Streaming output implemented using streamResponse()
+7. **M7**: --no-stream option for buffered output using respond()
+8. **M8**: Temperature control option (-t/--temperature) with GenerationOptions

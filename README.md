@@ -31,6 +31,8 @@ ARGUMENTS:
 OPTIONS:
   -i, --instruction TEXT  Set system instructions for model (can be repeated)
   -p, --prompt TEXT       Add inline text to prompt (can be repeated)
+  -t, --temperature VALUE Set sampling temperature 0.0-1.0 (default: system default)
+      --no-stream         Disable streaming; wait for complete response
   -v, --verbose           Show processing details
   -h, --help              Show help information
 ```
@@ -97,17 +99,36 @@ aigen -i "Summarize in 5 sentences" -p "Key points:" report.txt
 aigen -v prompt.txt
 ```
 
+**Non-streaming mode:**
+```bash
+aigen --no-stream -p "What is 2+2?"
+```
+
+**Custom temperature:**
+```bash
+# Lower temperature (0.0-0.3) for more focused, deterministic responses
+aigen -t 0.2 -p "What is the capital of France?"
+
+# Higher temperature (0.7-1.0) for more creative, varied responses
+aigen -t 0.8 -p "Write a creative story opening"
+
+# Mid-range temperature (0.4-0.6) for balanced responses
+aigen -t 0.5 -p "Explain quantum computing"
+```
+
 ## How It Works
 
 1. Reads input from inline prompt texts (`-p`), files, or stdin
 2. Optionally sets system instructions (`-i`) for the model
 3. Concatenates prompt texts and file contents with newlines
 4. Sends the combined prompt to Apple's on-device Foundation Model with instructions
-5. Prints the model's response to stdout
+5. **Streams** the model's response to stdout in real-time as it's generated (or waits for complete response with `--no-stream`)
 
 Notes:
 - When using both `-p` and file arguments, all prompt texts are concatenated first, followed by all file contents
 - Multiple instructions are concatenated with newlines and passed to the LanguageModelSession
+- By default, output is streamed incrementally so you see the response as it's being generated
+- Use `--no-stream` to wait for the complete response before printing (non-streaming mode)
 
 ## Error Handling
 

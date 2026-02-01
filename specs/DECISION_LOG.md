@@ -10,4 +10,10 @@
 2026-01-31 14:35 | IMPLEMENTATION_PLAN.md | Phase 4 complete - prompt text option fully implemented and tested
 2026-01-31 14:45 | SPECIFICATION.md | Added -i/--instruction option for system instructions to LanguageModelSession
 2026-01-31 14:50 | IMPLEMENTATION_PLAN.md | Phase 5 complete - system instructions option fully implemented and tested
+2026-01-31 15:00 | SPECIFICATION.md | Changed output mode from buffered to streaming using streamResponse()
+2026-01-31 15:10 | IMPLEMENTATION_PLAN.md | Phase 6 complete - streaming output implemented using streamResponse()
+2026-01-31 15:15 | SPECIFICATION.md | Added --no-stream option to use respond() instead of streamResponse()
+2026-01-31 15:30 | IMPLEMENTATION_PLAN.md | Phase 7 complete - --no-stream option fully implemented and tested
+2026-01-31 15:45 | SPECIFICATION.md | Added -t/--temperature option (0.0-1.0) for GenerationOptions
+2026-01-31 16:00 | IMPLEMENTATION_PLAN.md | Phase 8 complete - temperature option fully implemented and tested
 <!-- LOG_END -->

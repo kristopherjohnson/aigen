@@ -42,8 +42,10 @@ This is a single-file CLI application (`Sources/aigen/main.swift`) with a simple
    - All `-p/--prompt` text arguments (concatenated first)
    - All file arguments (read and concatenated)
    - Stdin (if no prompts or files provided)
-3. `sendToModel()` - sends concatenated input to FoundationModels framework with optional instructions
-4. Response printed to stdout, verbose info to stderr
+3. `sendToModel()` - sends prompt to FoundationModels framework with optional instructions
+   - By default: streams response in real-time using `streamResponse()`
+   - With `--no-stream`: waits for complete response using `respond()`
+4. Response printed to stdout (streaming or buffered), verbose info to stderr
 
 **Key Design Decisions:**
 - System instructions (`-i`) are stored separately and passed to LanguageModelSession
@@ -85,6 +87,17 @@ echo "Hello" | .build/debug/aigen
 
 # Test verbose mode
 .build/debug/aigen -v -i "Test instruction" -p "Test prompt"
+
+# Test non-streaming mode
+.build/debug/aigen --no-stream -p "What is 2+2?"
+
+# Test non-streaming with verbose and instructions
+.build/debug/aigen -v --no-stream -i "Be concise" -p "Explain AI"
+
+# Test temperature control
+.build/debug/aigen -t 0.2 -p "What is the capital of France?"
+.build/debug/aigen -t 0.8 -p "Write a creative story"
+.build/debug/aigen -v -t 0.5 -p "test"
 ```
 
 ## Foundation Models API Usage
@@ -107,9 +120,43 @@ let session = LanguageModelSession {
     instructionsText  // String containing concatenated instructions
 }
 
-// Send prompt and get response
+// Stream response (default mode in aigen)
+let stream = session.streamResponse(to: prompt)
+var previousLength = 0
+for try await snapshot in stream {
+    let fullContent = snapshot.content
+    if fullContent.count > previousLength {
+        let newContent = String(fullContent.dropFirst(previousLength))
+        print(newContent, terminator: "")
+        fflush(stdout)
+        previousLength = fullContent.count
+    }
+}
+
+// Note: Snapshots contain full accumulated content, not deltas
+// Must track previous length to print only new content
+
+// Buffered response (--no-stream mode in aigen)
 let response = try await session.respond(to: prompt)
-return response.content
+print(response.content, terminator: "")
+
+// Using GenerationOptions for temperature control
+let options = GenerationOptions(temperature: 0.7)
+
+// Stream with options
+let stream = session.streamResponse(to: prompt, options: options)
+// ... process stream as above
+
+// Buffered response with options
+let response = try await session.respond(to: prompt, options: options)
+
+// When temperature is nil, pass no options (uses system default)
+if let temperature {
+    let options = GenerationOptions(temperature: temperature)
+    let stream = session.streamResponse(to: prompt, options: options)
+} else {
+    let stream = session.streamResponse(to: prompt)
+}
 ```
 
 ## Error Handling
