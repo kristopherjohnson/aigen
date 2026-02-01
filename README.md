@@ -14,7 +14,7 @@ A Swift CLI tool that sends prompts to Apple Intelligence Foundation Models. Rea
 Build from source using Swift Package Manager:
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/kristopherjohnson/aigen.git
 cd aigen
 swift build -c release
 cp .build/release/aigen /usr/local/bin/  # may need 'sudo'

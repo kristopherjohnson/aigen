@@ -4,6 +4,8 @@
 
 A Swift CLI tool that sends prompts to Apple Intelligence Foundation Models. Reads input from files or stdin and prints the model's response.
 
+**Repository:** https://github.com/kristopherjohnson/aigen
+
 ## Goals
 
 - Simple Unix-philosophy tool: read input → process with AI → print output

@@ -16,4 +16,5 @@
 2026-01-31 15:30 | IMPLEMENTATION_PLAN.md | Phase 7 complete - --no-stream option fully implemented and tested
 2026-01-31 15:45 | SPECIFICATION.md | Added -t/--temperature option (0.0-1.0) for GenerationOptions
 2026-01-31 16:00 | IMPLEMENTATION_PLAN.md | Phase 8 complete - temperature option fully implemented and tested
+2026-01-31 16:15 | SPECIFICATION.md, CLAUDE.md, README.md | Added repository URL: https://github.com/kristopherjohnson/aigen
 <!-- LOG_END -->

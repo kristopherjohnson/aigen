@@ -6,6 +6,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 `aigen` is a Swift CLI tool that sends prompts to Apple Intelligence Foundation Models. It's a single-file executable that reads input from files, inline prompt text, or stdin, optionally with system instructions, and prints the AI model's response.
 
+## Repository
+
+- GitHub: https://github.com/kristopherjohnson/aigen
+
 ## Requirements
 
 - macOS 26+ (Tahoe) - required for FoundationModels framework
