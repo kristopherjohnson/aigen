@@ -74,11 +74,6 @@ aigen -p "Summarize this document:" report.txt
 aigen -p "You are a helpful assistant." -p "What is 2+2?"
 ```
 
-**Complex combinations:**
-```bash
-aigen -p "System: Be concise" context.txt -p "Question: Explain"
-```
-
 **System instructions:**
 ```bash
 aigen -i "Be concise" -p "What is 2+2?"
@@ -122,7 +117,7 @@ aigen -t 0.5 -p "Explain quantum computing"
 man otool | aigen -p "Summarize this for me:" -
 
 # Mix stdin with files in specific order
-aigen -p "Context:" - file.txt -p "Question: explain"
+aigen -p "Context:" intro.txt - question.txt
 
 # Use stdin at beginning
 echo "test input" | aigen - -p "Is this correct?"

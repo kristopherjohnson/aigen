@@ -16,10 +16,9 @@ struct Aigen: AsyncParsableCommand {
               aigen system.txt context.txt question.txt
               aigen -p "What is the capital of France?"
               aigen -p "Summarize this:" document.txt
-              aigen -p "Good morning" file.md -p "Good evening"
               aigen -i "You are a helpful assistant" -p "What is 2+2?"
               aigen -i "Be concise" -i "Use bullet points" document.txt
-              man otool | aigen -p "Summarize this for me:" -
+              man otool | aigen -p "Summarize this command for me:" -
             """
     )
 
@@ -32,7 +31,8 @@ struct Aigen: AsyncParsableCommand {
     @Option(name: [.short, .long], help: "Add inline text to prompt (can be repeated)")
     var prompt: [String] = []
 
-    @Option(name: [.short, .long], help: "Set sampling temperature 0.0-1.0 (default: system default)")
+    @Option(
+        name: [.short, .long], help: "Set sampling temperature 0.0-1.0 (default: system default)")
     var temperature: Double?
 
     @Flag(name: .long, help: "Disable streaming; wait for complete response")
@@ -64,7 +64,8 @@ struct Aigen: AsyncParsableCommand {
 
         let instructionsText = instruction.isEmpty ? nil : instruction.joined(separator: "\n")
 
-        try await sendToModel(input, instructions: instructionsText, temperature: temperature, stream: !noStream)
+        try await sendToModel(
+            input, instructions: instructionsText, temperature: temperature, stream: !noStream)
         print()  // Final newline after response
 
         if verbose {
@@ -115,7 +116,9 @@ struct Aigen: AsyncParsableCommand {
     private func readFile(at path: String) throws -> String {
         do {
             return try String(contentsOf: URL(fileURLWithPath: path), encoding: .utf8)
-        } catch let error as NSError where error.domain == NSCocoaErrorDomain && error.code == NSFileReadNoSuchFileError {
+        } catch let error as NSError
+            where error.domain == NSCocoaErrorDomain && error.code == NSFileReadNoSuchFileError
+        {
             throw ValidationError("File not found: \(path)")
         } catch {
             throw ValidationError("Failed to read file '\(path)': \(error.localizedDescription)")
@@ -130,7 +133,9 @@ struct Aigen: AsyncParsableCommand {
         return lines.joined()
     }
 
-    private func sendToModel(_ prompt: String, instructions: String?, temperature: Double?, stream: Bool) async throws {
+    private func sendToModel(
+        _ prompt: String, instructions: String?, temperature: Double?, stream: Bool
+    ) async throws {
         guard #available(macOS 26, *) else {
             throw ValidationError("Foundation Models requires macOS 26 or newer.")
         }
@@ -141,11 +146,12 @@ struct Aigen: AsyncParsableCommand {
             throw ValidationError(availabilityMessage(for: model.availability))
         }
 
-        let session = if let instructions {
-            LanguageModelSession { instructions }
-        } else {
-            LanguageModelSession()
-        }
+        let session =
+            if let instructions {
+                LanguageModelSession { instructions }
+            } else {
+                LanguageModelSession()
+            }
 
         let options = temperature.map { GenerationOptions(temperature: $0) }
 
@@ -157,12 +163,15 @@ struct Aigen: AsyncParsableCommand {
     }
 
     @available(macOS 26, *)
-    private func streamResponse(session: LanguageModelSession, prompt: String, options: GenerationOptions?) async throws {
-        let responseStream = if let options {
-            session.streamResponse(to: prompt, options: options)
-        } else {
-            session.streamResponse(to: prompt)
-        }
+    private func streamResponse(
+        session: LanguageModelSession, prompt: String, options: GenerationOptions?
+    ) async throws {
+        let responseStream =
+            if let options {
+                session.streamResponse(to: prompt, options: options)
+            } else {
+                session.streamResponse(to: prompt)
+            }
         var previousLength = 0
         for try await snapshot in responseStream {
             let fullContent = snapshot.content
@@ -176,12 +185,15 @@ struct Aigen: AsyncParsableCommand {
     }
 
     @available(macOS 26, *)
-    private func bufferedResponse(session: LanguageModelSession, prompt: String, options: GenerationOptions?) async throws {
-        let response = if let options {
-            try await session.respond(to: prompt, options: options)
-        } else {
-            try await session.respond(to: prompt)
-        }
+    private func bufferedResponse(
+        session: LanguageModelSession, prompt: String, options: GenerationOptions?
+    ) async throws {
+        let response =
+            if let options {
+                try await session.respond(to: prompt, options: options)
+            } else {
+                try await session.respond(to: prompt)
+            }
         print(response.content, terminator: "")
     }
 
