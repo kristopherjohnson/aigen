@@ -77,7 +77,7 @@ struct Aigen: AsyncParsableCommand {
             if verbose {
                 print("Reading from stdin...", to: &standardError)
             }
-            return try readStdin()
+            return readStdin()
         }
 
         var contents: [String] = []
@@ -100,17 +100,16 @@ struct Aigen: AsyncParsableCommand {
     }
 
     private func readFile(at path: String) throws -> String {
-        guard FileManager.default.fileExists(atPath: path) else {
-            throw ValidationError("File not found: \(path)")
-        }
         do {
             return try String(contentsOf: URL(fileURLWithPath: path), encoding: .utf8)
+        } catch let error as NSError where error.domain == NSCocoaErrorDomain && error.code == NSFileReadNoSuchFileError {
+            throw ValidationError("File not found: \(path)")
         } catch {
             throw ValidationError("Failed to read file '\(path)': \(error.localizedDescription)")
         }
     }
 
-    private func readStdin() throws -> String {
+    private func readStdin() -> String {
         var lines: [String] = []
         while let line = readLine(strippingNewline: false) {
             lines.append(line)
@@ -129,44 +128,48 @@ struct Aigen: AsyncParsableCommand {
             throw ValidationError(availabilityMessage(for: model.availability))
         }
 
-        let session: LanguageModelSession
-        if let instructions {
-            session = LanguageModelSession { instructions }
+        let session = if let instructions {
+            LanguageModelSession { instructions }
         } else {
-            session = LanguageModelSession()
+            LanguageModelSession()
         }
 
-        // Create GenerationOptions if temperature is specified
-        let options: GenerationOptions? = if let temperature {
-            GenerationOptions(temperature: temperature)
-        } else {
-            nil
-        }
+        let options = temperature.map { GenerationOptions(temperature: $0) }
 
         if stream {
-            let responseStream = if let options {
-                session.streamResponse(to: prompt, options: options)
-            } else {
-                session.streamResponse(to: prompt)
-            }
-            var previousLength = 0
-            for try await snapshot in responseStream {
-                let fullContent = snapshot.content
-                if fullContent.count > previousLength {
-                    let newContent = String(fullContent.dropFirst(previousLength))
-                    print(newContent, terminator: "")
-                    fflush(stdout)
-                    previousLength = fullContent.count
-                }
-            }
+            try await streamResponse(session: session, prompt: prompt, options: options)
         } else {
-            let response = if let options {
-                try await session.respond(to: prompt, options: options)
-            } else {
-                try await session.respond(to: prompt)
-            }
-            print(response.content, terminator: "")
+            try await bufferedResponse(session: session, prompt: prompt, options: options)
         }
+    }
+
+    @available(macOS 26, *)
+    private func streamResponse(session: LanguageModelSession, prompt: String, options: GenerationOptions?) async throws {
+        let responseStream = if let options {
+            session.streamResponse(to: prompt, options: options)
+        } else {
+            session.streamResponse(to: prompt)
+        }
+        var previousLength = 0
+        for try await snapshot in responseStream {
+            let fullContent = snapshot.content
+            if fullContent.count > previousLength {
+                let newContent = String(fullContent.dropFirst(previousLength))
+                print(newContent, terminator: "")
+                fflush(stdout)
+                previousLength = fullContent.count
+            }
+        }
+    }
+
+    @available(macOS 26, *)
+    private func bufferedResponse(session: LanguageModelSession, prompt: String, options: GenerationOptions?) async throws {
+        let response = if let options {
+            try await session.respond(to: prompt, options: options)
+        } else {
+            try await session.respond(to: prompt)
+        }
+        print(response.content, terminator: "")
     }
 
     @available(macOS 26, *)
