@@ -26,7 +26,7 @@ cp .build/release/aigen /usr/local/bin/  # may need 'sudo'
 USAGE: aigen [options] [file ...]
 
 ARGUMENTS:
-  file                    Input files to read (reads stdin if none provided)
+  file                    Input files to read (use '-' to read stdin; reads stdin if no arguments)
 
 OPTIONS:
   -i, --instruction TEXT  Set system instructions for model (can be repeated)
@@ -116,6 +116,18 @@ aigen -t 0.8 -p "Write a creative story opening"
 aigen -t 0.5 -p "Explain quantum computing"
 ```
 
+**Explicit stdin with `-` (Unix convention):**
+```bash
+# Append stdin after prompt text
+man otool | aigen -p "Summarize this for me:" -
+
+# Mix stdin with files in specific order
+aigen -p "Context:" - file.txt -p "Question: explain"
+
+# Use stdin at beginning
+echo "test input" | aigen - -p "Is this correct?"
+```
+
 ## How It Works
 
 1. Reads input from inline prompt texts (`-p`), files, or stdin
@@ -126,6 +138,8 @@ aigen -t 0.5 -p "Explain quantum computing"
 
 Notes:
 - When using both `-p` and file arguments, all prompt texts are concatenated first, followed by all file contents
+- Use `-` as a file argument to read stdin at a specific position in the input sequence
+- If `-` appears multiple times, stdin is only read once (subsequent `-` are ignored)
 - Multiple instructions are concatenated with newlines and passed to the LanguageModelSession
 - By default, output is streamed incrementally so you see the response as it's being generated
 - Use `--no-stream` to wait for the complete response before printing (non-streaming mode)

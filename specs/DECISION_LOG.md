@@ -17,4 +17,5 @@
 2026-01-31 15:45 | SPECIFICATION.md | Added -t/--temperature option (0.0-1.0) for GenerationOptions
 2026-01-31 16:00 | IMPLEMENTATION_PLAN.md | Phase 8 complete - temperature option fully implemented and tested
 2026-01-31 16:15 | SPECIFICATION.md, CLAUDE.md, README.md | Added repository URL: https://github.com/kristopherjohnson/aigen
+2026-01-31 19:50 | SPECIFICATION.md, IMPLEMENTATION_PLAN.md, TEST_PLAN.md | Add explicit stdin support using `-` as file argument (Unix convention) to allow stdin to be mixed with prompts and files
 <!-- LOG_END -->

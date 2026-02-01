@@ -23,9 +23,10 @@ A Swift CLI tool that sends prompts to Apple Intelligence Foundation Models. Rea
 
 - **File input**: Accept one or more file paths as command-line arguments
 - **Stdin fallback**: Read from stdin when no files are provided
+- **Explicit stdin**: Use `-` as a special file argument to read stdin at a specific position
 - **Prompt text option**: Accept inline prompt text via `-p/--prompt` option (can be used multiple times)
 - **System instructions**: Accept system instructions via `-i/--instruction` option (can be used multiple times)
-- **Prompt concatenation**: Combine contents of multiple files and prompt texts in order specified
+- **Prompt concatenation**: Combine contents of multiple files, stdin, and prompt texts in order specified
 - **Model invocation**: Send prompt to Apple Intelligence Foundation Model with optional instructions
 - **Streaming output**: Stream model response to stdout as it's generated (default behavior)
 - **Output**: Print model response to stdout in real-time
@@ -44,7 +45,7 @@ A Swift CLI tool that sends prompts to Apple Intelligence Foundation Models. Rea
 USAGE: aigen [options] [file ...]
 
 ARGUMENTS:
-  file                    Input files to read (reads stdin if none provided)
+  file                    Input files to read (use '-' to read stdin; reads stdin if no arguments)
 
 OPTIONS:
   -i, --instruction TEXT  Set system instructions for model (can be repeated)
@@ -99,6 +100,15 @@ aigen -t 0.8 -p "Write a creative story opening"
 
 # Lower temperature for more focused responses
 aigen -t 0.2 -p "What is the capital of France?"
+
+# Explicit stdin with prompt (Unix convention)
+man otool | aigen -p "Summarize this for me:" -
+
+# Mix stdin with files in specific order
+aigen -p "Context:" - file.txt -p "Question: explain"
+
+# Stdin as first input
+echo "test" | aigen - -p "Is this correct?"
 ```
 
 ## Technical Requirements

@@ -19,6 +19,7 @@ struct Aigen: AsyncParsableCommand {
               aigen -p "Good morning" file.md -p "Good evening"
               aigen -i "You are a helpful assistant" -p "What is 2+2?"
               aigen -i "Be concise" -i "Use bullet points" document.txt
+              man otool | aigen -p "Summarize this for me:" -
             """
     )
 
@@ -37,7 +38,7 @@ struct Aigen: AsyncParsableCommand {
     @Flag(name: .long, help: "Disable streaming; wait for complete response")
     var noStream = false
 
-    @Argument(help: "Input files to read (reads stdin if none provided)")
+    @Argument(help: "Input files to read (use '-' to read stdin; reads stdin if no arguments)")
     var files: [String] = []
 
     mutating func run() async throws {
@@ -81,19 +82,31 @@ struct Aigen: AsyncParsableCommand {
         }
 
         var contents: [String] = []
+        var stdinRead = false
 
-        for promptText in prompt {
+        if !prompt.isEmpty {
             if verbose {
-                print("Adding prompt text...", to: &standardError)
+                let countText = prompt.count == 1 ? "prompt text" : "prompt texts"
+                print("Adding \(prompt.count) \(countText)...", to: &standardError)
             }
-            contents.append(promptText)
+            contents.append(contentsOf: prompt)
         }
 
         for filePath in files {
-            if verbose {
-                print("Reading \(filePath)...", to: &standardError)
+            if filePath == "-" {
+                if !stdinRead {
+                    if verbose {
+                        print("Reading from stdin (-)...", to: &standardError)
+                    }
+                    contents.append(readStdin())
+                    stdinRead = true
+                }
+            } else {
+                if verbose {
+                    print("Reading \(filePath)...", to: &standardError)
+                }
+                contents.append(try readFile(at: filePath))
             }
-            contents.append(try readFile(at: filePath))
         }
 
         return contents.joined(separator: "\n")

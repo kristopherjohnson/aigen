@@ -36,6 +36,14 @@
 - [x] Instructions work with prompts and files (tested)
 - [x] Empty instruction handled appropriately (ArgumentParser handles)
 
+### Stdin `-` Argument Handling
+- [x] `-` reads stdin at specified position (tested)
+- [x] Multiple `-` only reads stdin once (not multiple times) (tested)
+- [x] `-` works with prompt text (`-p "text" -`) (tested)
+- [x] `-` works mixed with files (`- file.txt`) (tested)
+- [x] `-` preserves order in concatenation (tested)
+- [x] Verbose output shows stdin being read via `-` (tested)
+
 ### Streaming Output
 - [x] Response streams to stdout incrementally (tested: works)
 - [x] No buffering delays (text appears as generated) (tested: fflush ensures immediate output)
@@ -100,6 +108,14 @@
 - [x] Temperature works with --no-stream mode (tested: works)
 - [x] Temperature works with instructions (tested: works)
 - [x] Verbose output shows temperature when specified (tested: works)
+
+### Stdin `-` Argument
+- [x] `man otool | aigen -p "Summarize this for me:" -` appends stdin after prompt (tested: works)
+- [x] `echo "test" | aigen - -p "Is this correct?"` puts stdin before prompt (tested: works)
+- [x] `aigen -p "Context:" - file.txt` mixes stdin with files in order (tested: works)
+- [x] `echo "data" | aigen - - file.txt` only reads stdin once (not twice) (tested: works)
+- [x] `aigen -v -p "test" -` shows verbose output for stdin via `-` (tested: works)
+- [x] `echo "hello" | aigen -` works (explicit stdin without prompts/files) (tested: works)
 
 ### Edge Cases
 - [ ] Very large file input (test context limits)

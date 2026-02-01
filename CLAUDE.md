@@ -45,6 +45,7 @@ This is a single-file CLI application (`Sources/aigen/main.swift`) with a simple
 2. `readInput()` - collects input from three sources in order:
    - All `-p/--prompt` text arguments (concatenated first)
    - All file arguments (read and concatenated)
+   - Special `-` file argument reads stdin at that position
    - Stdin (if no prompts or files provided)
 3. `sendToModel()` - sends prompt to FoundationModels framework with optional instructions
    - By default: streams response in real-time using `streamResponse()`
@@ -55,6 +56,8 @@ This is a single-file CLI application (`Sources/aigen/main.swift`) with a simple
 - System instructions (`-i`) are stored separately and passed to LanguageModelSession
 - Multiple instructions are concatenated with newlines
 - Prompt texts (`-p`) are always concatenated before file contents
+- File argument `-` reads stdin at that position (Unix convention)
+- If `-` appears multiple times, stdin is only read once
 - All inputs separated by newlines when joined
 - Verbose output goes to stderr via custom `StandardError` TextOutputStream
 - Uses `guard #available(macOS 26, *)` for platform checking
@@ -102,6 +105,11 @@ echo "Hello" | .build/debug/aigen
 .build/debug/aigen -t 0.2 -p "What is the capital of France?"
 .build/debug/aigen -t 0.8 -p "Write a creative story"
 .build/debug/aigen -v -t 0.5 -p "test"
+
+# Test explicit stdin with - (Unix convention)
+man ls | .build/debug/aigen -p "Summarize this for me:" -
+echo "test input" | .build/debug/aigen -p "Context:" - -p "Question: explain"
+echo "data" | .build/debug/aigen -v - -p "Process this"
 ```
 
 ## Foundation Models API Usage

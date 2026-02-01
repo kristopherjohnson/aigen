@@ -138,6 +138,26 @@
 - [x] Update CLAUDE.md with GenerationOptions API usage
 - [x] Update verbose output to show temperature when specified [agent: swift-expert]
 
+## Phase 9: Explicit Stdin with `-` Argument
+
+### 9.1 Implement `-` File Argument Recognition
+- [x] Detect when `-` appears in files array [agent: swift-expert]
+- [x] Read stdin when `-` is encountered [agent: swift-expert]
+- [x] Maintain order: process `-` at its position among other inputs [agent: swift-expert]
+
+### 9.2 Update Input Processing Logic
+- [x] Modify readInput() to handle `-` in files array [agent: swift-expert]
+- [x] Ensure stdin is only read once even if `-` appears multiple times [agent: swift-expert]
+- [x] Update verbose output to show "Reading from stdin (-)" [agent: swift-expert]
+
+### 9.3 Testing and Documentation
+- [x] Test `-` with prompt text: `echo "test" \| aigen -p "Prompt:" -` [agent: swift-expert]
+- [x] Test `-` mixed with files: `aigen -p "Start:" - file.txt` [agent: swift-expert]
+- [x] Test multiple `-` (should only read stdin once) [agent: swift-expert]
+- [x] Update README.md with stdin `-` examples
+- [x] Update help text to document `-` argument
+- [x] Update CLAUDE.md with `-` usage pattern
+
 ## Milestones
 
 1. **M1**: CLI accepts files/stdin and prints concatenated content
@@ -148,3 +168,4 @@
 6. **M6**: Streaming output implemented using streamResponse()
 7. **M7**: --no-stream option for buffered output using respond()
 8. **M8**: Temperature control option (-t/--temperature) with GenerationOptions
+9. **M9**: Explicit stdin support using `-` as file argument (Unix convention)
